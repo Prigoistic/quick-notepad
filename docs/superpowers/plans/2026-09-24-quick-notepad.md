@@ -79,11 +79,10 @@ import XCTest
 @testable import QuickNotepadCore
 
 final class DateFormattingTests: XCTestCase {
-    func testPlaceholder() {
-        XCTAssertTrue(true)
-    }
 }
 ```
+
+(Empty test case — this file exists only so the `QuickNotepadCoreTests` target has a source file to build. Task 2 fills in the first real test.)
 
 - [ ] **Step 4: Verify the package builds and tests run**
 
@@ -91,7 +90,7 @@ Run: `swift build`
 Expected: `Build complete!` with no errors.
 
 Run: `swift test`
-Expected: `Test Suite 'All tests' passed` (1 test).
+Expected: `Test Suite 'All tests' passed` (0 tests).
 
 - [ ] **Step 5: Commit**
 

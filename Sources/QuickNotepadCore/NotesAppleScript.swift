@@ -19,10 +19,18 @@ public enum NotesAppleScript {
         tell application "Notes"
             set targetTitle to "\(appleScriptSafeTitle)"
             set foundNote to missing value
-            repeat with n in notes of default account
-                if name of n is targetTitle and (name of container of n) is not "Recently Deleted" then
-                    set foundNote to n
-                    exit repeat
+            set allNotes to notes of default account
+            repeat with i from 1 to count of allNotes
+                set thisNote to item i of allNotes
+                if name of thisNote is targetTitle then
+                    set containerName to ""
+                    try
+                        set containerName to name of container of thisNote
+                    end try
+                    if containerName is not "Recently Deleted" then
+                        set foundNote to thisNote
+                        exit repeat
+                    end if
                 end if
             end repeat
             if foundNote is missing value then

@@ -77,6 +77,7 @@ final class NotepadPanel: NSPanel {
 
     func showAndFocus() {
         errorLabel.isHidden = true
+        updateTitleFromText()
         center()
         makeKeyAndOrderFront(nil)
         NSApp.activate()
@@ -85,6 +86,13 @@ final class NotepadPanel: NSPanel {
 
     func setText(_ text: String) {
         textView.string = text
+        updateTitleFromText()
+    }
+
+    private func updateTitleFromText() {
+        let firstLine = textView.string.split(separator: "\n", maxSplits: 1, omittingEmptySubsequences: false).first.map(String.init) ?? ""
+        let trimmed = firstLine.trimmingCharacters(in: .whitespaces)
+        title = trimmed.isEmpty ? "Quick Notepad" : trimmed
     }
 
     func currentText() -> String {
@@ -109,5 +117,9 @@ extension NotepadPanel: NSTextViewDelegate {
             return true
         }
         return false
+    }
+
+    func textDidChange(_ notification: Notification) {
+        updateTitleFromText()
     }
 }

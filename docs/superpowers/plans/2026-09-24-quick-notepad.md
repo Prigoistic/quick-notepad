@@ -692,7 +692,7 @@ final class AppState: NSObject, NSApplicationDelegate {
             self?.pendingText = self?.panel.currentText() ?? ""
         }
 
-        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusBar.squareLength)
+        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         statusItem.button?.title = "N"
         let menu = NSMenu()
         menu.addItem(withTitle: "Quit Quick Notepad", action: #selector(quit), keyEquivalent: "q")

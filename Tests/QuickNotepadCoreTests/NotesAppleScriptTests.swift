@@ -1,4 +1,5 @@
 import Testing
+import Foundation
 @testable import QuickNotepadCore
 
 @Suite struct NotesAppleScriptTests {
@@ -37,5 +38,38 @@ import Testing
             body: "she said \"hi\""
         )
         #expect(script.contains("she said &quot;hi&quot;"))
+    }
+
+    @Test func titleWithQuoteIsEscapedAtAppleScriptLayer() {
+        let script = NotesAppleScript.saveScript(
+            noteTitle: "a\"b",
+            subheading: "Sep 24, 2026 · 3:41 PM",
+            body: "hello"
+        )
+        #expect(script.contains("\"a\\\"b\""))
+    }
+
+    @Test func backslashInBodyIsEscapedAtAppleScriptLayer() {
+        let script = NotesAppleScript.saveScript(
+            noteTitle: "Quick Capture",
+            subheading: "Sep 24, 2026 · 3:41 PM",
+            body: "C:\\path"
+        )
+        #expect(script.contains("C:\\\\path"))
+    }
+
+    @Test func generatedScriptCompilesForAdversarialInput() {
+        let script = NotesAppleScript.saveScript(
+            noteTitle: "Quick Capture",
+            subheading: "Sep 24, 2026 · 3:41 PM",
+            body: "\"quotes\" \\backslash & <tags>\nline two\n\nline four"
+        )
+        let appleScript = NSAppleScript(source: script)
+        var error: NSDictionary?
+        let compiled = appleScript?.compileAndReturnError(&error) ?? false
+        #expect(compiled)
+        if !compiled {
+            Issue.record("AppleScript failed to compile: \(String(describing: error))")
+        }
     }
 }

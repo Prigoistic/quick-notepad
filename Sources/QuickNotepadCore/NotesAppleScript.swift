@@ -4,8 +4,11 @@ public enum NotesAppleScript {
     public static func saveScript(noteTitle: String, subheading: String, body: String) -> String {
         let htmlSubheading = htmlEscape(subheading)
         let htmlBody = body
-            .split(separator: "\n", omittingEmptySubsequences: false)
-            .map { "<div>\(htmlEscape(String($0)))</div>" }
+            .split(omittingEmptySubsequences: false, whereSeparator: \.isNewline)
+            .map { line -> String in
+                let escaped = htmlEscape(String(line))
+                return escaped.isEmpty ? "<div><br></div>" : "<div>\(escaped)</div>"
+            }
             .joined()
 
         let appendedBlock = "<div><br/></div><div><b>\(htmlSubheading)</b></div>\(htmlBody)"
@@ -14,11 +17,10 @@ public enum NotesAppleScript {
 
         return """
         tell application "Notes"
-            activate
             set targetTitle to "\(appleScriptSafeTitle)"
             set foundNote to missing value
             repeat with n in notes of default account
-                if name of n is targetTitle then
+                if name of n is targetTitle and (name of container of n) is not "Recently Deleted" then
                     set foundNote to n
                     exit repeat
                 end if

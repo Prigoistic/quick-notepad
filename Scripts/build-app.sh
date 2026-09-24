@@ -33,8 +33,12 @@ cat > "$CONTENTS/Info.plist" <<PLIST
     <true/>
     <key>LSMinimumSystemVersion</key>
     <string>14.0</string>
+    <key>NSAppleEventsUsageDescription</key>
+    <string>Quick Notepad saves your captures into Apple Notes.</string>
 </dict>
 </plist>
 PLIST
+
+codesign --force --sign - --identifier com.priyam.quicknotepad "$APP_BUNDLE"
 
 echo "Built $APP_BUNDLE"

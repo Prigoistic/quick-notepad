@@ -19,12 +19,15 @@ final class HotkeyManager {
         var eventType = EventTypeSpec(eventClass: OSType(kEventClassKeyboard), eventKind: OSType(kEventHotKeyPressed))
         let selfPointer = Unmanaged.passUnretained(self).toOpaque()
 
-        InstallEventHandler(GetApplicationEventTarget(), { _, event, userData in
+        let installStatus = InstallEventHandler(GetApplicationEventTarget(), { _, event, userData in
             guard let userData else { return noErr }
             let manager = Unmanaged<HotkeyManager>.fromOpaque(userData).takeUnretainedValue()
             manager.onTrigger()
             return noErr
         }, 1, &eventType, selfPointer, &eventHandler)
+        guard installStatus == noErr else {
+            throw HotkeyError.registrationFailed(installStatus)
+        }
 
         let hotKeyID = EventHotKeyID(signature: Self.signature, id: Self.hotKeyID)
         let cmdShiftMask = UInt32(cmdKey | shiftKey)

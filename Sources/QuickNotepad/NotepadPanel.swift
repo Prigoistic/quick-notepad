@@ -2,7 +2,6 @@ import AppKit
 
 final class NotepadPanel: NSPanel {
     var onSave: ((String) -> Void)?
-    var onDismiss: (() -> Void)?
 
     private let textView = NSTextView()
     private let errorLabel = NSTextField(labelWithString: "")
@@ -12,7 +11,7 @@ final class NotepadPanel: NSPanel {
         let contentRect = NSRect(x: 0, y: 0, width: 420, height: 260)
         self.init(
             contentRect: contentRect,
-            styleMask: [.nonactivatingPanel, .titled, .closable, .resizable],
+            styleMask: [.nonactivatingPanel, .titled, .resizable],
             backing: .buffered,
             defer: false
         )
@@ -25,6 +24,7 @@ final class NotepadPanel: NSPanel {
         level = .floating
         collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary]
         hidesOnDeactivate = false
+        isReleasedWhenClosed = false
 
         textView.isRichText = false
         textView.font = NSFont.systemFont(ofSize: 14)
@@ -56,12 +56,11 @@ final class NotepadPanel: NSPanel {
         ])
     }
 
-    func showAndFocus(withText text: String) {
-        textView.string = text
+    func showAndFocus() {
         errorLabel.isHidden = true
         center()
         makeKeyAndOrderFront(nil)
-        NSApp.activate(ignoringOtherApps: true)
+        NSApp.activate()
         makeFirstResponder(textView)
     }
 
@@ -79,7 +78,6 @@ final class NotepadPanel: NSPanel {
     }
 
     override func cancelOperation(_ sender: Any?) {
-        onDismiss?()
         orderOut(nil)
     }
 }

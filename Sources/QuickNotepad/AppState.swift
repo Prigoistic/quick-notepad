@@ -4,15 +4,11 @@ final class AppState: NSObject, NSApplicationDelegate {
     private var panel: NotepadPanel!
     private var hotkeyManager: HotkeyManager!
     private var statusItem: NSStatusItem!
-    private var pendingText: String = ""
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         panel = NotepadPanel()
         panel.onSave = { [weak self] text in
             self?.handleSave(text: text)
-        }
-        panel.onDismiss = { [weak self] in
-            self?.pendingText = self?.panel.currentText() ?? ""
         }
 
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
@@ -28,16 +24,20 @@ final class AppState: NSObject, NSApplicationDelegate {
             }
         } catch {
             NSLog("QuickNotepad: failed to register global hotkey: \(error)")
+            statusItem.button?.title = "N!"
         }
     }
 
     private func togglePanel() {
-        panel.showAndFocus(withText: pendingText)
+        if panel.isVisible {
+            panel.orderOut(nil)
+        } else {
+            panel.showAndFocus()
+        }
     }
 
     private func handleSave(text: String) {
-        guard !text.isEmpty else {
-            pendingText = ""
+        guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             panel.orderOut(nil)
             return
         }
@@ -46,11 +46,9 @@ final class AppState: NSObject, NSApplicationDelegate {
                 guard let self else { return }
                 switch result {
                 case .success:
-                    self.pendingText = ""
                     self.panel.setText("")
                     self.panel.orderOut(nil)
                 case .failure(let error):
-                    self.pendingText = text
                     self.panel.showError(error.userMessage)
                 }
             }

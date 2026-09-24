@@ -1,0 +1,6 @@
+{
+  "schemaVersion": "1.0",
+  "swiftCompiler": {
+    "extraCLIOptions": ["-plugin-path", "/Library/Developer/CommandLineTools/usr/lib/swift/host/plugins/testing"]
+  }
+}

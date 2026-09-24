@@ -123,7 +123,7 @@ git commit -m "chore: scaffold Swift package structure"
 **Interfaces:**
 - Produces: `DateFormatting.subheading(for date: Date) -> String`, used by `NotesAppleScript.saveScript` (Task 3) and by `AppState` (Task 8).
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Replace the placeholder test in `Tests/QuickNotepadCoreTests/DateFormattingTests.swift`:
 
@@ -151,12 +151,12 @@ import Foundation
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `swift test --toolset Toolset.json --filter DateFormattingTests`
 Expected: FAIL — `subheading(for:timeZone:)` does not exist on `DateFormatting`.
 
-- [ ] **Step 3: Implement the formatter**
+- [x] **Step 3: Implement the formatter**
 
 Replace `Sources/QuickNotepadCore/DateFormatting.swift`:
 
@@ -174,12 +174,12 @@ public enum DateFormatting {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `swift test --toolset Toolset.json --filter DateFormattingTests`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add Sources/QuickNotepadCore/DateFormatting.swift Tests/QuickNotepadCoreTests/DateFormattingTests.swift
@@ -200,7 +200,7 @@ git commit -m "feat: add date-time subheading formatter"
 
 Notes stores note bodies as HTML. This function must: (1) HTML-escape `subheading` and `body` so raw `&`/`<`/`>` in typed text can't break the note's markup, (2) turn each line of `body` into its own `<div>` (Notes represents paragraphs as divs; a raw `\n` does not render as a line break), and (3) escape the resulting HTML for embedding inside an AppleScript string literal (backslashes and double quotes — AppleScript string literals do support raw embedded newlines, so no newline escaping is needed at the AppleScript layer).
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 `Tests/QuickNotepadCoreTests/NotesAppleScriptTests.swift`:
 
@@ -248,12 +248,12 @@ import Testing
 }
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `swift test --toolset Toolset.json --filter NotesAppleScriptTests`
 Expected: FAIL — `NotesAppleScript` does not exist.
 
-- [ ] **Step 3: Implement the generator**
+- [x] **Step 3: Implement the generator**
 
 `Sources/QuickNotepadCore/NotesAppleScript.swift`:
 
@@ -307,12 +307,12 @@ public enum NotesAppleScript {
 }
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `swift test --toolset Toolset.json --filter NotesAppleScriptTests`
 Expected: PASS (4 tests).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add Sources/QuickNotepadCore/NotesAppleScript.swift Tests/QuickNotepadCoreTests/NotesAppleScriptTests.swift
@@ -330,7 +330,7 @@ git commit -m "feat: generate AppleScript source for appending into Notes"
 **Interfaces:**
 - Produces: `enum SaveError: Error, Equatable { case appleScriptCompileFailed(String); case appleScriptRuntimeFailed(String) }` and `SaveError.userMessage: String`, used by `NotesBridge` (Task 5) and `NotepadPanel`/`AppState` (Tasks 7–8) to show the inline error.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 `Tests/QuickNotepadCoreTests/SaveErrorTests.swift`:
 
@@ -351,12 +351,12 @@ import Testing
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `swift test --toolset Toolset.json --filter SaveErrorTests`
 Expected: FAIL — `SaveError` does not exist.
 
-- [ ] **Step 3: Implement the error type**
+- [x] **Step 3: Implement the error type**
 
 `Sources/QuickNotepadCore/SaveError.swift`:
 
@@ -376,12 +376,12 @@ public enum SaveError: Error, Equatable {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `swift test --toolset Toolset.json --filter SaveErrorTests`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add Sources/QuickNotepadCore/SaveError.swift Tests/QuickNotepadCoreTests/SaveErrorTests.swift
@@ -401,7 +401,7 @@ git commit -m "feat: add save error type with user-facing messages"
 
 This task drives the real Notes app via `NSAppleScript`, so it cannot be exercised by XCTest in CI-like isolation — the deliverable is verified manually against the real Notes app once wired into the running app in Task 8. No automated test step here; this task only adds the implementation.
 
-- [ ] **Step 1: Implement `NotesBridge`**
+- [x] **Step 1: Implement `NotesBridge`**
 
 `Sources/QuickNotepad/NotesBridge.swift`:
 
@@ -441,12 +441,12 @@ enum NotesBridge {
 }
 ```
 
-- [ ] **Step 2: Verify the package still builds**
+- [x] **Step 2: Verify the package still builds**
 
 Run: `swift build --toolset Toolset.json`
 Expected: `Build complete!` with no errors.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add Sources/QuickNotepad/NotesBridge.swift
@@ -463,7 +463,7 @@ git commit -m "feat: add NotesBridge to execute generated AppleScript"
 **Interfaces:**
 - Produces: `final class HotkeyManager { init(onTrigger: @escaping () -> Void) throws; }`, used by `AppState` (Task 8). Throws `HotkeyError.registrationFailed(OSStatus)` if `RegisterEventHotKey` fails.
 
-- [ ] **Step 1: Implement `HotkeyManager`**
+- [x] **Step 1: Implement `HotkeyManager`**
 
 `Sources/QuickNotepad/HotkeyManager.swift`:
 
@@ -517,16 +517,16 @@ final class HotkeyManager {
 }
 ```
 
-- [ ] **Step 2: Verify the package builds**
+- [x] **Step 2: Verify the package builds**
 
 Run: `swift build --toolset Toolset.json`
 Expected: `Build complete!` with no errors.
 
-- [ ] **Step 3: Manual verification (deferred to Task 8)**
+- [x] **Step 3: Manual verification (deferred to Task 8)**
 
 Global hotkey firing can only be observed once wired to a visible action, so functional verification happens in Task 8's manual test. No standalone test here.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add Sources/QuickNotepad/HotkeyManager.swift
@@ -543,7 +543,7 @@ git commit -m "feat: register global Cmd+Shift+N hotkey via Carbon"
 **Interfaces:**
 - Produces: `final class NotepadPanel: NSPanel { var onSave: ((String) -> Void)?; var onDismiss: (() -> Void)?; func showAndFocus(withText text: String); func setText(_ text: String); func currentText() -> String; func showError(_ message: String) }`, used by `AppState` (Task 8).
 
-- [ ] **Step 1: Implement `NotepadPanel`**
+- [x] **Step 1: Implement `NotepadPanel`**
 
 `Sources/QuickNotepad/NotepadPanel.swift`:
 
@@ -646,12 +646,12 @@ extension NotepadPanel: NSTextViewDelegate {
 }
 ```
 
-- [ ] **Step 2: Verify the package builds**
+- [x] **Step 2: Verify the package builds**
 
 Run: `swift build --toolset Toolset.json`
 Expected: `Build complete!` with no errors.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add Sources/QuickNotepad/NotepadPanel.swift
@@ -670,7 +670,7 @@ git commit -m "feat: add floating notepad panel that joins all Spaces"
 - Consumes: `HotkeyManager` (Task 6), `NotepadPanel` (Task 7), `NotesBridge.save` (Task 5).
 - Produces: `final class AppState: NSObject, NSApplicationDelegate`, instantiated once in `main.swift`.
 
-- [ ] **Step 1: Implement `AppState`**
+- [x] **Step 1: Implement `AppState`**
 
 `Sources/QuickNotepad/AppState.swift`:
 
@@ -740,7 +740,7 @@ final class AppState: NSObject, NSApplicationDelegate {
 }
 ```
 
-- [ ] **Step 2: Wire it up in `main.swift`**
+- [x] **Step 2: Wire it up in `main.swift`**
 
 Replace `Sources/QuickNotepad/main.swift`:
 
@@ -754,12 +754,12 @@ app.delegate = appState
 app.run()
 ```
 
-- [ ] **Step 3: Verify the package builds**
+- [x] **Step 3: Verify the package builds**
 
 Run: `swift build --toolset Toolset.json`
 Expected: `Build complete!` with no errors.
 
-- [ ] **Step 4: Manual functional test**
+- [x] **Step 4: Manual functional test**
 
 Run: `swift run QuickNotepad` (leave it running in a terminal)
 
@@ -771,7 +771,7 @@ Run: `swift run QuickNotepad` (leave it running in a terminal)
 
 Stop the running process with `Ctrl+C` when done.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add Sources/QuickNotepad/AppState.swift Sources/QuickNotepad/main.swift
@@ -789,7 +789,7 @@ git commit -m "feat: wire hotkey, panel, and Notes save into running app"
 - Consumes: the `QuickNotepad` executable produced by `swift build -c release`.
 - Produces: `QuickNotepad.app` bundle at the repo root (git-ignored build artifact), used by `install.sh` (Task 10).
 
-- [ ] **Step 1: Write the build script**
+- [x] **Step 1: Write the build script**
 
 `Scripts/build-app.sh`:
 
@@ -836,12 +836,12 @@ PLIST
 echo "Built $APP_BUNDLE"
 ```
 
-- [ ] **Step 2: Make it executable and run it**
+- [x] **Step 2: Make it executable and run it**
 
 Run: `chmod +x Scripts/build-app.sh && ./Scripts/build-app.sh`
 Expected: ends with `Built /Users/priyamghosh/Documents/GitHub/quick-notepad/QuickNotepad.app`
 
-- [ ] **Step 3: Manual verification**
+- [x] **Step 3: Manual verification**
 
 Run: `open QuickNotepad.app`
 
@@ -849,7 +849,7 @@ Run: `open QuickNotepad.app`
 - [ ] Confirm `Cmd+Shift+N` still opens the panel and save still works, same as Task 8's manual test.
 - [ ] Quit it via the menu bar item's "Quit Quick Notepad".
 
-- [ ] **Step 4: Ignore build artifacts and commit the script**
+- [x] **Step 4: Ignore build artifacts and commit the script**
 
 Create/append `.gitignore` at repo root:
 
@@ -875,7 +875,7 @@ git commit -m "build: add script to assemble QuickNotepad.app bundle"
 - Consumes: `QuickNotepad.app` bundle produced by Task 9.
 - Produces: a running LaunchAgent that survives logout/login.
 
-- [ ] **Step 1: Write the LaunchAgent plist**
+- [x] **Step 1: Write the LaunchAgent plist**
 
 `LaunchAgent/com.priyam.quicknotepad.plist`:
 
@@ -902,7 +902,7 @@ git commit -m "build: add script to assemble QuickNotepad.app bundle"
 </plist>
 ```
 
-- [ ] **Step 2: Write the install script**
+- [x] **Step 2: Write the install script**
 
 `Scripts/install.sh`:
 
@@ -929,12 +929,12 @@ launchctl load "$LAUNCH_AGENTS/$PLIST_NAME"
 echo "Installed to $DEST_APPS/$APP_NAME.app and loaded LaunchAgent."
 ```
 
-- [ ] **Step 3: Run it**
+- [x] **Step 3: Run it**
 
 Run: `chmod +x Scripts/install.sh && ./Scripts/install.sh`
 Expected: `Installed to /Users/priyamghosh/Applications/QuickNotepad.app and loaded LaunchAgent.`
 
-- [ ] **Step 4: Manual verification (full checklist from the spec)**
+- [x] **Step 4: Manual verification (full checklist from the spec)**
 
 - [ ] `Cmd+Shift+N` opens the panel over a fullscreen browser window without switching Spaces.
 - [ ] `Cmd+Shift+N` opens the panel while on a different Space (e.g. a fullscreen PDF/WhatsApp).
@@ -945,7 +945,7 @@ Expected: `Installed to /Users/priyamghosh/Applications/QuickNotepad.app and loa
 - [ ] `Escape` hides the panel without saving, and reopening restores the unsaved text.
 - [ ] Log out and back in — confirm the menu bar "N" item reappears without manually relaunching anything (check `~/Library/Logs/QuickNotepad.log` if it doesn't).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add LaunchAgent/com.priyam.quicknotepad.plist Scripts/install.sh

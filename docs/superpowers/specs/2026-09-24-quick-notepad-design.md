@@ -18,6 +18,14 @@ reliably overlays any app/Space and saves into Apple Notes.
 - Runs quietly in the background, auto-starting at login. No App Store install, no
   third-party app — a small program we build and the user owns.
 
+## Known limitation
+
+AppleScript has no true "append" operation for a Notes body — saving reads the note's
+current HTML body, concatenates the new block, and writes the whole thing back. For a
+plain-text capture note this is fine, but if you ever manually add an image, checklist,
+or table to the "Quick Capture" note, a save from Quick Notepad can drop that formatting
+on the write-back. Keep "Quick Capture" as plain text only if this matters to you.
+
 ## Non-goals
 
 - Rich text formatting in the capture panel itself (plain text in, formatted subheading is

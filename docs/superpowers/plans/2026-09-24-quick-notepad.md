@@ -6,7 +6,7 @@
 
 **Architecture:** A Swift Package with two source targets — `QuickNotepadCore` (pure, unit-testable logic: timestamp formatting, AppleScript source generation, error types) and `QuickNotepad` (the executable: Carbon global hotkey, the floating `NSPanel`, the `NSAppleScript` bridge to Notes, and the wiring between them). Packaged into a `.app` bundle with `LSUIElement = true` and installed as a LaunchAgent so it starts at login with no Dock icon.
 
-**Tech Stack:** Swift 6.2 (Swift Package Manager, no Xcode project), AppKit, Carbon `RegisterEventHotKey`, `NSAppleScript`, XCTest.
+**Tech Stack:** Swift 6.2 (Swift Package Manager, no Xcode project), AppKit, Carbon `RegisterEventHotKey`, `NSAppleScript`, the **Swift Testing** framework (`import Testing`, not XCTest).
 
 ## Global Constraints
 
@@ -15,6 +15,8 @@
 - Unsaved text must never be silently discarded: on `Escape` or on save failure, the panel keeps the typed text.
 - No App Store / third-party app dependency — everything here is code in this repo, built locally.
 - Repo root: `/Users/priyamghosh/Documents/GitHub/quick-notepad`. Do not add Claude/AI co-author lines to commits in this repo (per user instruction).
+- **This machine has only Command Line Tools installed, no Xcode.app.** There is no `XCTest.framework` available at all, so every test file must use the **Swift Testing** framework (`import Testing`, `@Test func ...`, `#expect(...)`) instead of XCTest. Never write `import XCTest` or `XCTestCase` in this repo.
+- **Every `swift build` and `swift test` invocation in this repo (including inside scripts) must pass `--toolset Toolset.json`** (relative to repo root). Without it, `swift test` fails with "plugin for module 'TestingMacros' not found" — this CLT install's Swift Testing macro plugin lives in a nonstandard path (`/Library/Developer/CommandLineTools/usr/lib/swift/host/plugins/testing`) that `Toolset.json` (created in Task 1) points the compiler at. `swift run` does not need it (no test target involved).
 
 ---
 
@@ -22,6 +24,7 @@
 
 **Files:**
 - Create: `Package.swift`
+- Create: `Toolset.json`
 - Create: `Sources/QuickNotepadCore/DateFormatting.swift`
 - Create: `Sources/QuickNotepad/main.swift`
 - Create: `Tests/QuickNotepadCoreTests/DateFormattingTests.swift`
@@ -29,7 +32,7 @@
 **Interfaces:**
 - Produces: package targets `QuickNotepadCore` (library), `QuickNotepad` (executable, depends on `QuickNotepadCore`), `QuickNotepadCoreTests` (test target, depends on `QuickNotepadCore`).
 
-- [ ] **Step 1: Write `Package.swift`**
+- [x] **Step 1: Write `Package.swift`**
 
 ```swift
 // swift-tools-version:5.9
@@ -37,7 +40,7 @@ import PackageDescription
 
 let package = Package(
     name: "QuickNotepad",
-    platforms: [.macOS(.v13)],
+    platforms: [.macOS(.v14)],
     targets: [
         .target(
             name: "QuickNotepadCore"
@@ -54,7 +57,20 @@ let package = Package(
 )
 ```
 
-- [ ] **Step 2: Add placeholder source files so the package builds**
+- [x] **Step 2: Write `Toolset.json`**
+
+This machine has only Command Line Tools installed (no Xcode.app), and its Swift Testing macro plugin lives in a nonstandard location that the compiler doesn't search by default. This file points it there; every `swift build`/`swift test` command from here on passes `--toolset Toolset.json`.
+
+```json
+{
+  "schemaVersion": "1.0",
+  "swiftCompiler": {
+    "extraCLIOptions": ["-plugin-path", "/Library/Developer/CommandLineTools/usr/lib/swift/host/plugins/testing"]
+  }
+}
+```
+
+- [x] **Step 3: Add placeholder source files so the package builds**
 
 `Sources/QuickNotepadCore/DateFormatting.swift`:
 
@@ -70,32 +86,29 @@ enum DateFormatting {}
 print("QuickNotepad starting…")
 ```
 
-- [ ] **Step 3: Add a placeholder test file**
+- [x] **Step 4: Add a placeholder test file**
 
 `Tests/QuickNotepadCoreTests/DateFormattingTests.swift`:
 
 ```swift
-import XCTest
+import Testing
 @testable import QuickNotepadCore
-
-final class DateFormattingTests: XCTestCase {
-}
 ```
 
-(Empty test case — this file exists only so the `QuickNotepadCoreTests` target has a source file to build. Task 2 fills in the first real test.)
+(No tests yet — this file exists only so the `QuickNotepadCoreTests` target has a source file to build. Task 2 fills in the first real test. Do not use XCTest/XCTestCase — see Global Constraints.)
 
-- [ ] **Step 4: Verify the package builds and tests run**
+- [x] **Step 5: Verify the package builds and tests run**
 
-Run: `swift build`
+Run: `swift build --toolset Toolset.json`
 Expected: `Build complete!` with no errors.
 
-Run: `swift test`
-Expected: `Test Suite 'All tests' passed` (0 tests).
+Run: `swift test --toolset Toolset.json`
+Expected: `Test run with 0 tests in 0 suites passed`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
-git add Package.swift Sources Tests
+git add Package.swift Toolset.json Sources Tests
 git commit -m "chore: scaffold Swift package structure"
 ```
 
@@ -115,11 +128,12 @@ git commit -m "chore: scaffold Swift package structure"
 Replace the placeholder test in `Tests/QuickNotepadCoreTests/DateFormattingTests.swift`:
 
 ```swift
-import XCTest
+import Testing
+import Foundation
 @testable import QuickNotepadCore
 
-final class DateFormattingTests: XCTestCase {
-    func testSubheadingFormatsDateAndTime() {
+@Suite struct DateFormattingTests {
+    @Test func subheadingFormatsDateAndTime() {
         var components = DateComponents()
         components.year = 2026
         components.month = 9
@@ -132,14 +146,14 @@ final class DateFormattingTests: XCTestCase {
 
         let result = DateFormatting.subheading(for: date, timeZone: calendar.timeZone)
 
-        XCTAssertEqual(result, "Sep 24, 2026 · 3:41 PM")
+        #expect(result == "Sep 24, 2026 · 3:41 PM")
     }
 }
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `swift test --filter DateFormattingTests`
+Run: `swift test --toolset Toolset.json --filter DateFormattingTests`
 Expected: FAIL — `subheading(for:timeZone:)` does not exist on `DateFormatting`.
 
 - [ ] **Step 3: Implement the formatter**
@@ -162,7 +176,7 @@ public enum DateFormatting {
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `swift test --filter DateFormattingTests`
+Run: `swift test --toolset Toolset.json --filter DateFormattingTests`
 Expected: PASS.
 
 - [ ] **Step 5: Commit**
@@ -191,52 +205,52 @@ Notes stores note bodies as HTML. This function must: (1) HTML-escape `subheadin
 `Tests/QuickNotepadCoreTests/NotesAppleScriptTests.swift`:
 
 ```swift
-import XCTest
+import Testing
 @testable import QuickNotepadCore
 
-final class NotesAppleScriptTests: XCTestCase {
-    func testScriptContainsEscapedNoteTitle() {
+@Suite struct NotesAppleScriptTests {
+    @Test func scriptContainsEscapedNoteTitle() {
         let script = NotesAppleScript.saveScript(
             noteTitle: "Quick Capture",
             subheading: "Sep 24, 2026 · 3:41 PM",
             body: "hello"
         )
-        XCTAssertTrue(script.contains("\"Quick Capture\""))
+        #expect(script.contains("\"Quick Capture\""))
     }
 
-    func testBodyHtmlEscapesSpecialCharacters() {
+    @Test func bodyHtmlEscapesSpecialCharacters() {
         let script = NotesAppleScript.saveScript(
             noteTitle: "Quick Capture",
             subheading: "Sep 24, 2026 · 3:41 PM",
             body: "Tom & Jerry <3"
         )
-        XCTAssertTrue(script.contains("Tom &amp; Jerry &lt;3"))
-        XCTAssertFalse(script.contains("Tom & Jerry <3"))
+        #expect(script.contains("Tom &amp; Jerry &lt;3"))
+        #expect(!script.contains("Tom & Jerry <3"))
     }
 
-    func testBodyNewlinesBecomeSeparateDivs() {
+    @Test func bodyNewlinesBecomeSeparateDivs() {
         let script = NotesAppleScript.saveScript(
             noteTitle: "Quick Capture",
             subheading: "Sep 24, 2026 · 3:41 PM",
             body: "line one\nline two"
         )
-        XCTAssertTrue(script.contains("<div>line one</div><div>line two</div>"))
+        #expect(script.contains("<div>line one</div><div>line two</div>"))
     }
 
-    func testEmbeddedQuoteIsEscapedForAppleScriptStringLiteral() {
+    @Test func embeddedQuoteIsEscapedForAppleScriptStringLiteral() {
         let script = NotesAppleScript.saveScript(
             noteTitle: "Quick Capture",
             subheading: "Sep 24, 2026 · 3:41 PM",
             body: "she said \"hi\""
         )
-        XCTAssertTrue(script.contains("she said &quot;hi&quot;"))
+        #expect(script.contains("she said &quot;hi&quot;"))
     }
 }
 ```
 
 - [ ] **Step 2: Run tests to verify they fail**
 
-Run: `swift test --filter NotesAppleScriptTests`
+Run: `swift test --toolset Toolset.json --filter NotesAppleScriptTests`
 Expected: FAIL — `NotesAppleScript` does not exist.
 
 - [ ] **Step 3: Implement the generator**
@@ -295,7 +309,7 @@ public enum NotesAppleScript {
 
 - [ ] **Step 4: Run tests to verify they pass**
 
-Run: `swift test --filter NotesAppleScriptTests`
+Run: `swift test --toolset Toolset.json --filter NotesAppleScriptTests`
 Expected: PASS (4 tests).
 
 - [ ] **Step 5: Commit**
@@ -321,25 +335,25 @@ git commit -m "feat: generate AppleScript source for appending into Notes"
 `Tests/QuickNotepadCoreTests/SaveErrorTests.swift`:
 
 ```swift
-import XCTest
+import Testing
 @testable import QuickNotepadCore
 
-final class SaveErrorTests: XCTestCase {
-    func testCompileFailureMessageIncludesReason() {
+@Suite struct SaveErrorTests {
+    @Test func compileFailureMessageIncludesReason() {
         let error = SaveError.appleScriptCompileFailed("syntax error")
-        XCTAssertEqual(error.userMessage, "Couldn't save: syntax error")
+        #expect(error.userMessage == "Couldn't save: syntax error")
     }
 
-    func testRuntimeFailureMessageIncludesReason() {
+    @Test func runtimeFailureMessageIncludesReason() {
         let error = SaveError.appleScriptRuntimeFailed("Notes got an error: Can't get note")
-        XCTAssertEqual(error.userMessage, "Couldn't save: Notes got an error: Can't get note")
+        #expect(error.userMessage == "Couldn't save: Notes got an error: Can't get note")
     }
 }
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `swift test --filter SaveErrorTests`
+Run: `swift test --toolset Toolset.json --filter SaveErrorTests`
 Expected: FAIL — `SaveError` does not exist.
 
 - [ ] **Step 3: Implement the error type**
@@ -364,7 +378,7 @@ public enum SaveError: Error, Equatable {
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `swift test --filter SaveErrorTests`
+Run: `swift test --toolset Toolset.json --filter SaveErrorTests`
 Expected: PASS.
 
 - [ ] **Step 5: Commit**
@@ -429,7 +443,7 @@ enum NotesBridge {
 
 - [ ] **Step 2: Verify the package still builds**
 
-Run: `swift build`
+Run: `swift build --toolset Toolset.json`
 Expected: `Build complete!` with no errors.
 
 - [ ] **Step 3: Commit**
@@ -505,7 +519,7 @@ final class HotkeyManager {
 
 - [ ] **Step 2: Verify the package builds**
 
-Run: `swift build`
+Run: `swift build --toolset Toolset.json`
 Expected: `Build complete!` with no errors.
 
 - [ ] **Step 3: Manual verification (deferred to Task 8)**
@@ -634,7 +648,7 @@ extension NotepadPanel: NSTextViewDelegate {
 
 - [ ] **Step 2: Verify the package builds**
 
-Run: `swift build`
+Run: `swift build --toolset Toolset.json`
 Expected: `Build complete!` with no errors.
 
 - [ ] **Step 3: Commit**
@@ -742,7 +756,7 @@ app.run()
 
 - [ ] **Step 3: Verify the package builds**
 
-Run: `swift build`
+Run: `swift build --toolset Toolset.json`
 Expected: `Build complete!` with no errors.
 
 - [ ] **Step 4: Manual functional test**
@@ -789,7 +803,7 @@ APP_BUNDLE="$REPO_ROOT/$APP_NAME.app"
 CONTENTS="$APP_BUNDLE/Contents"
 
 cd "$REPO_ROOT"
-swift build -c release
+swift build -c release --toolset Toolset.json
 
 rm -rf "$APP_BUNDLE"
 mkdir -p "$CONTENTS/MacOS"
@@ -814,7 +828,7 @@ cat > "$CONTENTS/Info.plist" <<PLIST
     <key>LSUIElement</key>
     <true/>
     <key>LSMinimumSystemVersion</key>
-    <string>13.0</string>
+    <string>14.0</string>
 </dict>
 </plist>
 PLIST

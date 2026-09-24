@@ -30,6 +30,10 @@ final class NotepadPanel: NSPanel {
         textView.isRichText = false
         textView.font = NSFont.systemFont(ofSize: 14)
         textView.isAutomaticQuoteSubstitutionEnabled = false
+        textView.isContinuousSpellCheckingEnabled = true
+        textView.isGrammarCheckingEnabled = true
+        textView.isAutomaticSpellingCorrectionEnabled = true
+        textView.isAutomaticTextCompletionEnabled = true
         textView.delegate = self
         textView.drawsBackground = true
         textView.backgroundColor = .textBackgroundColor

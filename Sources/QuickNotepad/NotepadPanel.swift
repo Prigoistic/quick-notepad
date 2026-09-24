@@ -3,9 +3,10 @@ import AppKit
 final class NotepadPanel: NSPanel {
     var onSave: ((String) -> Void)?
 
-    private let textView = NSTextView()
+    private let scrollView = NSTextView.scrollableTextView()
+    private var textView: NSTextView { scrollView.documentView as! NSTextView }
     private let errorLabel = NSTextField(labelWithString: "")
-    private let scrollView = NSScrollView()
+    private let saveButton = NSButton(title: "Save", target: nil, action: nil)
 
     convenience init() {
         let contentRect = NSRect(x: 0, y: 0, width: 420, height: 260)
@@ -30,8 +31,11 @@ final class NotepadPanel: NSPanel {
         textView.font = NSFont.systemFont(ofSize: 14)
         textView.isAutomaticQuoteSubstitutionEnabled = false
         textView.delegate = self
+        textView.drawsBackground = true
+        textView.backgroundColor = .textBackgroundColor
+        textView.textColor = .labelColor
+        textView.textContainerInset = NSSize(width: 4, height: 6)
 
-        scrollView.documentView = textView
         scrollView.hasVerticalScroller = true
         scrollView.translatesAutoresizingMaskIntoConstraints = false
 
@@ -40,20 +44,35 @@ final class NotepadPanel: NSPanel {
         errorLabel.isHidden = true
         errorLabel.translatesAutoresizingMaskIntoConstraints = false
 
+        saveButton.bezelStyle = .rounded
+        saveButton.keyEquivalent = "\r"
+        saveButton.keyEquivalentModifierMask = [.command]
+        saveButton.target = self
+        saveButton.action = #selector(saveButtonPressed)
+        saveButton.translatesAutoresizingMaskIntoConstraints = false
+
         guard let container = contentView else { return }
         container.addSubview(scrollView)
         container.addSubview(errorLabel)
+        container.addSubview(saveButton)
 
         NSLayoutConstraint.activate([
+            saveButton.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -8),
+            saveButton.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -8),
+
             errorLabel.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 8),
-            errorLabel.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -8),
-            errorLabel.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -8),
+            errorLabel.trailingAnchor.constraint(lessThanOrEqualTo: saveButton.leadingAnchor, constant: -8),
+            errorLabel.centerYAnchor.constraint(equalTo: saveButton.centerYAnchor),
 
             scrollView.topAnchor.constraint(equalTo: container.topAnchor, constant: 8),
             scrollView.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 8),
             scrollView.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -8),
-            scrollView.bottomAnchor.constraint(equalTo: errorLabel.topAnchor, constant: -4),
+            scrollView.bottomAnchor.constraint(equalTo: saveButton.topAnchor, constant: -8),
         ])
+    }
+
+    @objc private func saveButtonPressed() {
+        onSave?(textView.string)
     }
 
     func showAndFocus() {

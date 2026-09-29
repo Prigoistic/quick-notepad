@@ -58,6 +58,16 @@ import Foundation
         #expect(script.contains("C:\\\\path"))
     }
 
+    @Test func nilSubheadingOmitsHeadingButKeepsBody() {
+        let script = NotesAppleScript.saveScript(
+            noteTitle: "Quick Capture",
+            subheading: nil,
+            body: "more thoughts"
+        )
+        #expect(script.contains("<div>more thoughts</div>"))
+        #expect(!script.contains("<b>"))
+    }
+
     @Test func generatedScriptCompilesForAdversarialInput() {
         let script = NotesAppleScript.saveScript(
             noteTitle: "Quick Capture",

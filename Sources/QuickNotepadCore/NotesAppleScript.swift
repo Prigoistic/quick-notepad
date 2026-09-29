@@ -1,8 +1,10 @@
 import Foundation
 
 public enum NotesAppleScript {
-    public static func saveScript(noteTitle: String, subheading: String, body: String) -> String {
-        let htmlSubheading = htmlEscape(subheading)
+    /// - Parameter subheading: a bold timestamp heading to insert before the body
+    ///   (a fresh "New" entry), or `nil` to append the body directly after the
+    ///   last entry with no new heading (a "Continue" entry).
+    public static func saveScript(noteTitle: String, subheading: String?, body: String) -> String {
         let htmlBody = body
             .split(omittingEmptySubsequences: false, whereSeparator: \.isNewline)
             .map { line -> String in
@@ -11,7 +13,8 @@ public enum NotesAppleScript {
             }
             .joined()
 
-        let appendedBlock = "<div><br/></div><div><b>\(htmlSubheading)</b></div>\(htmlBody)"
+        let headingBlock = subheading.map { "<div><b>\(htmlEscape($0))</b></div>" } ?? ""
+        let appendedBlock = "<div><br/></div>\(headingBlock)\(htmlBody)"
         let appleScriptSafeBlock = appleScriptEscape(appendedBlock)
         let appleScriptSafeTitle = appleScriptEscape(noteTitle)
 

@@ -1,12 +1,21 @@
 import AppKit
 
 final class NotepadPanel: NSPanel {
-    var onSave: ((String) -> Void)?
+    var onSave: ((String, SaveMode) -> Void)?
 
     private let scrollView = NSTextView.scrollableTextView()
     private var textView: NSTextView { scrollView.documentView as! NSTextView }
     private let errorLabel = NSTextField(labelWithString: "")
-    private let saveButton = NSButton(title: "Save", target: nil, action: nil)
+    private let newButton = NSButton(
+        image: NSImage(systemSymbolName: "square.and.pencil", accessibilityDescription: "New entry") ?? NSImage(),
+        target: nil,
+        action: nil
+    )
+    private let continueButton = NSButton(
+        image: NSImage(systemSymbolName: "text.append", accessibilityDescription: "Continue last entry") ?? NSImage(),
+        target: nil,
+        action: nil
+    )
 
     convenience init() {
         let contentRect = NSRect(x: 0, y: 0, width: 420, height: 260)
@@ -48,35 +57,50 @@ final class NotepadPanel: NSPanel {
         errorLabel.isHidden = true
         errorLabel.translatesAutoresizingMaskIntoConstraints = false
 
-        saveButton.bezelStyle = .rounded
-        saveButton.keyEquivalent = "\r"
-        saveButton.keyEquivalentModifierMask = [.command]
-        saveButton.target = self
-        saveButton.action = #selector(saveButtonPressed)
-        saveButton.translatesAutoresizingMaskIntoConstraints = false
+        newButton.bezelStyle = .texturedRounded
+        newButton.toolTip = "New entry (Cmd+Enter) — saves with a fresh timestamp"
+        newButton.keyEquivalent = "\r"
+        newButton.keyEquivalentModifierMask = [.command]
+        newButton.target = self
+        newButton.action = #selector(newButtonPressed)
+        newButton.translatesAutoresizingMaskIntoConstraints = false
+
+        continueButton.bezelStyle = .texturedRounded
+        continueButton.toolTip = "Continue last entry — appends with no new timestamp"
+        continueButton.target = self
+        continueButton.action = #selector(continueButtonPressed)
+        continueButton.translatesAutoresizingMaskIntoConstraints = false
 
         guard let container = contentView else { return }
         container.addSubview(scrollView)
         container.addSubview(errorLabel)
-        container.addSubview(saveButton)
+        container.addSubview(newButton)
+        container.addSubview(continueButton)
 
         NSLayoutConstraint.activate([
-            saveButton.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -8),
-            saveButton.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -8),
+            newButton.topAnchor.constraint(equalTo: container.topAnchor, constant: 8),
+            newButton.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 8),
 
-            errorLabel.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 8),
-            errorLabel.trailingAnchor.constraint(lessThanOrEqualTo: saveButton.leadingAnchor, constant: -8),
-            errorLabel.centerYAnchor.constraint(equalTo: saveButton.centerYAnchor),
+            continueButton.topAnchor.constraint(equalTo: container.topAnchor, constant: 8),
+            continueButton.leadingAnchor.constraint(equalTo: newButton.trailingAnchor, constant: 6),
 
-            scrollView.topAnchor.constraint(equalTo: container.topAnchor, constant: 8),
+            scrollView.topAnchor.constraint(equalTo: newButton.bottomAnchor, constant: 8),
             scrollView.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 8),
             scrollView.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -8),
-            scrollView.bottomAnchor.constraint(equalTo: saveButton.topAnchor, constant: -8),
+            scrollView.bottomAnchor.constraint(equalTo: errorLabel.topAnchor, constant: -4),
+
+            errorLabel.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 8),
+            errorLabel.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -8),
+            errorLabel.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -8),
         ])
     }
 
-    @objc private func saveButtonPressed() {
-        onSave?(textView.string)
+    @objc private func newButtonPressed() {
+        onSave?(textView.string, .newEntry)
+    }
+
+    @objc private func continueButtonPressed() {
+        onSave?(textView.string, .continueEntry)
     }
 
     func showAndFocus() {
@@ -117,7 +141,7 @@ extension NotepadPanel: NSTextViewDelegate {
     func textView(_ textView: NSTextView, doCommandBy commandSelector: Selector) -> Bool {
         if commandSelector == #selector(NSResponder.insertNewline(_:)),
            NSApp.currentEvent?.modifierFlags.contains(.command) == true {
-            onSave?(textView.string)
+            onSave?(textView.string, .newEntry)
             return true
         }
         return false

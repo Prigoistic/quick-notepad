@@ -1,14 +1,19 @@
 import Foundation
 import QuickNotepadCore
 
+enum SaveMode {
+    case newEntry
+    case continueEntry
+}
+
 enum NotesBridge {
     static let noteTitle = "Quick Capture"
 
     private static let queue = DispatchQueue(label: "com.priyam.quicknotepad.notesbridge")
 
-    static func save(body: String, completion: @escaping (Result<Void, SaveError>) -> Void) {
+    static func save(body: String, mode: SaveMode, completion: @escaping (Result<Void, SaveError>) -> Void) {
         queue.async {
-            let subheading = DateFormatting.subheading(for: Date())
+            let subheading = mode == .newEntry ? DateFormatting.subheading(for: Date()) : nil
             let source = NotesAppleScript.saveScript(noteTitle: noteTitle, subheading: subheading, body: body)
 
             guard let script = NSAppleScript(source: source) else {

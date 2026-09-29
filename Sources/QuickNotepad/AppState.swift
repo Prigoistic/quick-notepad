@@ -7,8 +7,8 @@ final class AppState: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         panel = NotepadPanel()
-        panel.onSave = { [weak self] text in
-            self?.handleSave(text: text)
+        panel.onSave = { [weak self] text, mode in
+            self?.handleSave(text: text, mode: mode)
         }
 
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
@@ -38,12 +38,12 @@ final class AppState: NSObject, NSApplicationDelegate {
         }
     }
 
-    private func handleSave(text: String) {
+    private func handleSave(text: String, mode: SaveMode) {
         guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             panel.orderOut(nil)
             return
         }
-        NotesBridge.save(body: text) { [weak self] result in
+        NotesBridge.save(body: text, mode: mode) { [weak self] result in
             DispatchQueue.main.async {
                 guard let self else { return }
                 switch result {

@@ -58,6 +58,13 @@ final class AppState: NSObject, NSApplicationDelegate {
     }
 
     @objc private func quit() {
+        // KeepAlive in the LaunchAgent restarts this process on any exit, so
+        // quitting has to remove the job from launchd first, or it comes
+        // right back.
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/bin/launchctl")
+        process.arguments = ["bootout", "gui/\(getuid())/com.priyam.quicknotepad"]
+        try? process.run()
         NSApp.terminate(nil)
     }
 
